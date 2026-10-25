@@ -1,0 +1,54 @@
+{
+  "name": "flexible-task-planner",
+  "displayName": "Flexible Task Planner",
+  "description": "Customizable code comment task scanner and prioritized project plan",
+  "version": "0.1.0",
+  "publisher": "student-local",
+  "private": true,
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "main": "./out/extension.js",
+  "activationEvents": ["onView:ftp.tasks", "onView:ftp.plan", "onCommand:ftp.settings", "onCommand:ftp.refresh"],
+  "contributes": {
+    "viewsContainers": { "activitybar": [{ "id": "ftp", "title": "Task Planner", "icon": "resources/icon.svg" }] },
+    "views": { "ftp": [{ "id": "ftp.tasks", "name": "Found Tasks" }, { "id": "ftp.plan", "name": "Work Plan" }] },
+    "commands": [
+      { "command": "ftp.refresh", "title": "Task Planner: Refresh", "icon": "$(refresh)" },
+      { "command": "ftp.settings", "title": "Task Planner: Configure", "icon": "$(settings-gear)" },
+      { "command": "ftp.open", "title": "Task Planner: Open Task" },
+      { "command": "ftp.export", "title": "Task Planner: Export Plan as Markdown", "icon": "$(export)" }
+    ],
+    "menus": {
+      "view/title": [
+        { "command": "ftp.refresh", "when": "view == ftp.tasks || view == ftp.plan", "group": "navigation@1" },
+        { "command": "ftp.settings", "when": "view == ftp.tasks || view == ftp.plan", "group": "navigation@2" },
+        { "command": "ftp.export", "when": "view == ftp.plan", "group": "navigation@3" }
+      ]
+    },
+    "configuration": {
+      "title": "Flexible Task Planner",
+      "properties": {
+        "ftp.markers": {
+          "type": "array", "description": "Custom task markers. Each marker has a name and priority (1 = highest).",
+          "default": [
+            { "name": "BUG", "priority": 1 }, { "name": "FIXME", "priority": 1 },
+            { "name": "TODO", "priority": 2 }, { "name": "TEST", "priority": 2 },
+            { "name": "HACK", "priority": 3 }, { "name": "OPTIMIZE", "priority": 3 }
+          ],
+          "items": { "type": "object", "required": ["name", "priority"], "properties": { "name": { "type": "string" }, "priority": { "type": "integer", "minimum": 1, "maximum": 9 } } }
+        },
+        "ftp.include": { "type": "string", "default": "**/*.{ts,tsx,js,jsx,cpp,h,hpp,c,py,java,go,rs,cs,html,css,md}", "description": "Glob for files to scan." },
+        "ftp.exclude": { "type": "string", "default": "**/{node_modules,.git,out,dist,build,venv,.venv}/**", "description": "Glob for excluded paths." },
+        "ftp.commentPrefixes": { "type": "array", "items": { "type": "string" }, "default": ["//", "#", "/*", "*", "<!--", "--"], "description": "Recognized beginning-of-comment strings. The parser uses line-based heuristics, not a full language parser." },
+        "ftp.scanAnywhere": { "type": "boolean", "default": false, "description": "Detect markers anywhere in the line, rather than requiring a recognized comment prefix." },
+        "ftp.caseSensitive": { "type": "boolean", "default": false },
+        "ftp.autoRefresh": { "type": "boolean", "default": true },
+        "ftp.maxFiles": { "type": "integer", "default": 2000, "minimum": 1, "maximum": 20000 },
+        "ftp.maxFileKB": { "type": "integer", "default": 512, "minimum": 1, "maximum": 10240 },
+        "ftp.groupTasksByFile": { "type": "boolean", "default": true }
+      }
+    }
+  },
+  "scripts": { "compile": "tsc -p ./", "watch": "tsc -watch -p ./", "test": "npm run compile && node --test test/*.test.cjs", "package": "vsce package" },
+  "devDependencies": { "@types/node": "^20.12.0", "@types/vscode": "^1.85.0", "typescript": "^5.5.4", "@vscode/vsce": "^3.2.2" }
+}
